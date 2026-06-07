@@ -1,4 +1,5 @@
 import logging
+import os
 from fastapi import APIRouter, Depends, HTTPException, Request
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -27,7 +28,12 @@ async def monad_scan(
     """x402-gated adversarial security scan with OWASP-weighted TPI scoring."""
     payment_header = await verify_x402_payment(request)
 
-    scan_result = await run_full_scan(body.agent_endpoint, body.agent_id)
+    agent_endpoint = body.agent_endpoint
+    if agent_endpoint == "__demo__":
+        port = os.getenv("PORT", "8000")
+        agent_endpoint = f"http://127.0.0.1:{port}/api/v1/demo-agent"
+
+    scan_result = await run_full_scan(agent_endpoint, body.agent_id)
 
     await save_attestation(
         session,
