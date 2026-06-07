@@ -5,8 +5,12 @@
 import axios from 'axios';
 import { useAuthStore } from '@/store/authStore';
 
+// VITE_API_URL is injected at build time on Railway (e.g. https://backend.up.railway.app/api/v1)
+// Falls back to '/api/v1' for local dev (vite proxy handles it)
+const BASE_URL = import.meta.env.VITE_API_URL ?? '/api/v1';
+
 const api = axios.create({
-    baseURL: '/api/v1',
+    baseURL: BASE_URL,
     headers: {
         'Content-Type': 'application/json',
     },
@@ -33,7 +37,7 @@ api.interceptors.response.use(
             const refreshToken = useAuthStore.getState().refreshToken;
             if (refreshToken) {
                 try {
-                    const { data } = await axios.post('/api/v1/auth/refresh', {
+                    const { data } = await axios.post(`${BASE_URL}/auth/refresh`, {
                         refresh_token: refreshToken,
                     });
                     useAuthStore.getState().setTokens(data.access_token, data.refresh_token);

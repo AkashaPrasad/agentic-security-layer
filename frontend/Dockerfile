@@ -12,21 +12,23 @@ COPY package.json package-lock.json ./
 RUN npm ci
 
 COPY . .
+
+# VITE_API_URL is baked into the JS bundle at build time.
+# On Railway set this to: https://<your-backend>.up.railway.app/api/v1
+ARG VITE_API_URL
+ENV VITE_API_URL=${VITE_API_URL}
+
 RUN npm run build          # outputs to /app/dist
 
 
 # ── Stage 2: Serve with Nginx ────────────────────────────────────────────────
 FROM nginx:1.27-alpine
 
-# Remove default nginx config
 RUN rm /etc/nginx/conf.d/default.conf
-
-# Our custom nginx config
 COPY nginx.conf /etc/nginx/conf.d/default.conf
-
-# Copy built assets
 COPY --from=builder /app/dist /usr/share/nginx/html
 
+# Railway injects PORT at runtime; default to 80 for local
 EXPOSE 80
 
 CMD ["nginx", "-g", "daemon off;"]

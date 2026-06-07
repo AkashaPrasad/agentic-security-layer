@@ -1,0 +1,13 @@
+[build]
+builder = "DOCKERFILE"
+dockerfilePath = "Dockerfile"
+
+# VITE_API_URL must be set as an environment variable in Railway.
+# Railway passes it as a Docker build arg automatically.
+[build.args]
+VITE_API_URL = "$VITE_API_URL"
+
+[deploy]
+healthcheckPath = "/"
+healthcheckTimeout = 30
+restartPolicyType = "ON_FAILURE"
