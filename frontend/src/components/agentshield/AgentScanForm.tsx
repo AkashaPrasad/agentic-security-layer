@@ -17,7 +17,7 @@ import SmartToyOutlinedIcon from '@mui/icons-material/SmartToyOutlined'
 import SecurityOutlinedIcon from '@mui/icons-material/SecurityOutlined'
 import { useAccount } from 'wagmi'
 import { useQuery } from '@tanstack/react-query'
-import { scanAgent, type ScanResponse } from '@/services/agentshieldService'
+import { scanAgent, scanDemoAgent, type ScanResponse } from '@/services/agentshieldService'
 import { providerService } from '@/services/providerService'
 import { DEMO_AGENT_URL, SCAN_PRICE_DISPLAY } from '@/lib/x402Config'
 
@@ -82,11 +82,19 @@ export default function AgentScanForm({ onScanComplete }: AgentScanFormProps) {
     setIsScanning(true)
     setError(null)
     try {
-      const result = await scanAgent({
-        agentEndpoint: effectiveEndpoint,
-        agentId: id,
-        walletAddress: address,
-      })
+      const isDemo = mode === 'url' && (
+        agentEndpoint === '__demo__' ||
+        agentEndpoint.endsWith('/demo-agent') ||
+        agentEndpoint.includes('localhost') ||
+        agentEndpoint.includes('127.0.0.1')
+      )
+      const result = isDemo
+        ? await scanDemoAgent()
+        : await scanAgent({
+            agentEndpoint: effectiveEndpoint,
+            agentId: id,
+            walletAddress: address,
+          })
       onScanComplete(result)
     } catch (err: any) {
       if (err?.response?.status === 402) {

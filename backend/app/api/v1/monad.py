@@ -50,6 +50,33 @@ async def monad_scan(
     )
 
 
+@router.post("/scan-demo", response_model=ScanResponse)
+async def monad_scan_demo(
+    session: AsyncSession = Depends(get_async_session),
+):
+    """Run the demo scan in-process — no agent URL, no networking."""
+    agent_id = f"demo-agent-{__import__('time').strftime('%H%M%S')}"
+    scan_result = await run_full_scan("__demo__", agent_id)
+
+    await save_attestation(
+        session,
+        {**scan_result, "agent_endpoint": "__demo__"},
+        wallet_address=None,
+    )
+
+    return ScanResponse(
+        agent_id=scan_result["agent_id"],
+        tpi_score=scan_result["tpi_score"],
+        passed_tests=scan_result["passed_tests"],
+        total_tests=scan_result["total_tests"],
+        test_results=scan_result["test_results"],
+        owasp_breakdown=scan_result.get("owasp_breakdown", {}),
+        kill_switch_triggered=scan_result.get("kill_switch_triggered", False),
+        result_hash=scan_result["result_hash"],
+        timestamp=scan_result["timestamp"],
+    )
+
+
 @router.post("/attest", response_model=AttestResponse)
 async def monad_attest(
     body: AttestRequest,

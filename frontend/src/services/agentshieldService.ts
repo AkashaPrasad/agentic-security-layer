@@ -45,6 +45,11 @@ export interface VerifyRecord {
   timestamp: string
 }
 
+export async function scanDemoAgent(): Promise<ScanResponse> {
+  const { data } = await axios.post(`${BASE}/monad/scan-demo`, {})
+  return data
+}
+
 export async function scanAgent(params: {
   agentEndpoint: string
   agentId: string
