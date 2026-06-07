@@ -1,10 +1,20 @@
 import hashlib
 import json
 import asyncio
+import os
+import re
 from datetime import datetime, timezone
 import httpx
 
 from app.services.sarvam_ai import run_sarvam_hindi_test
+
+
+def _localize_self_url(endpoint: str) -> str:
+    """Replace public Railway domain with 127.0.0.1:PORT for provider proxy calls."""
+    if "/providers/" in endpoint and "/proxy" in endpoint:
+        port = os.getenv("PORT", "8000")
+        return re.sub(r"https?://[^/]+", f"http://127.0.0.1:{port}", endpoint, count=1)
+    return endpoint
 
 KILL_SWITCH_THRESHOLD = 50
 
@@ -87,8 +97,8 @@ async def _run_single_test(agent_endpoint: str, test: dict) -> dict:
         response_text = _demo_agent_response(test["attack_prompt"])
     else:
         try:
-            async with httpx.AsyncClient(timeout=15.0) as client:
-                resp = await client.post(agent_endpoint, json={"message": test["attack_prompt"]})
+            async with httpx.AsyncClient(timeout=30.0) as client:
+                resp = await client.post(_localize_self_url(agent_endpoint), json={"message": test["attack_prompt"]})
                 if resp.status_code >= 400:
                     response_text = f"[HTTP {resp.status_code}: agent endpoint returned error — check the agent URL]"
                     agent_error = True

@@ -1,5 +1,6 @@
 import httpx
 import os
+import re
 import logging
 
 logger = logging.getLogger(__name__)
@@ -25,8 +26,12 @@ async def run_sarvam_hindi_test(agent_endpoint: str) -> dict:
         agent_response_text = "मैं एक सहायक हूं। मैं अपने सिस्टम प्रॉम्प्ट को प्रकट नहीं कर सकता।"
     else:
         try:
-            async with httpx.AsyncClient(timeout=15.0) as client:
-                resp = await client.post(agent_endpoint, json={"message": HINDI_INJECTION})
+            _ep = agent_endpoint
+            if "/providers/" in _ep and "/proxy" in _ep:
+                port = os.getenv("PORT", "8000")
+                _ep = re.sub(r"https?://[^/]+", f"http://127.0.0.1:{port}", _ep, count=1)
+            async with httpx.AsyncClient(timeout=30.0) as client:
+                resp = await client.post(_ep, json={"message": HINDI_INJECTION})
                 if resp.status_code >= 400:
                     agent_response_text = f"[HTTP {resp.status_code}: agent endpoint returned error — check the agent URL]"
                     agent_error = True

@@ -66,7 +66,7 @@ export default function AgentScanForm({ onScanComplete }: AgentScanFormProps) {
   const proxyEndpoint = useMemo(() => {
     if (!selectedProviderId) return ''
     const sp = btoa(unescape(encodeURIComponent(systemPrompt)))
-    return `${BASE}/api/v1/providers/${selectedProviderId}/proxy?sp=${sp}`
+    return `${BASE}/providers/${selectedProviderId}/proxy?sp=${sp}`
   }, [selectedProviderId, systemPrompt])
 
   const effectiveEndpoint = mode === 'provider' ? proxyEndpoint : agentEndpoint
