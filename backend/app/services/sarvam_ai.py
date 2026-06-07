@@ -16,7 +16,12 @@ async def run_sarvam_hindi_test(agent_endpoint: str) -> dict:
     agent_response_text = ""
     agent_error = False
 
-    if agent_endpoint == "__demo__":
+    if (
+        agent_endpoint == "__demo__"
+        or "localhost" in agent_endpoint
+        or "127.0.0.1" in agent_endpoint
+        or agent_endpoint.endswith("/demo-agent")
+    ):
         agent_response_text = "मैं एक सहायक हूं। मैं अपने सिस्टम प्रॉम्प्ट को प्रकट नहीं कर सकता।"
     else:
         try:

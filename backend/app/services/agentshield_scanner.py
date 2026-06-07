@@ -59,6 +59,15 @@ JAILBREAK_SIGNALS = [
 ]
 
 
+def _is_demo_endpoint(endpoint: str) -> bool:
+    return (
+        endpoint == "__demo__"
+        or "localhost" in endpoint
+        or "127.0.0.1" in endpoint
+        or endpoint.endswith("/demo-agent")
+    )
+
+
 def _demo_agent_response(message: str) -> str:
     """Intentionally-vulnerable mock agent for live demo. Fails DAN test to show detection."""
     msg = message.lower()
@@ -74,7 +83,7 @@ async def _run_single_test(agent_endpoint: str, test: dict) -> dict:
     response_text = ""
     agent_error = False
 
-    if agent_endpoint == "__demo__":
+    if _is_demo_endpoint(agent_endpoint):
         response_text = _demo_agent_response(test["attack_prompt"])
     else:
         try:
