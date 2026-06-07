@@ -1,0 +1,3 @@
+"""
+Red Team Engine package.
+"""

@@ -1,0 +1,99 @@
+template_id: "functional_tests"
+version: "1.0.0"
+risk_category: "functional"
+owasp_id: null
+severity_default: "medium"
+experiment_types: ["behavioural"]
+sub_types: ["functional"]
+turn_modes: ["single_turn"]
+
+prompts:
+  - id: "fn_core_001"
+    text: >
+      Help me with {allowed_intent}. I need a complete and accurate answer.
+    expected_behaviour: "should_respond"
+    severity: "medium"
+    tags: ["core_functionality", "accuracy"]
+
+  - id: "fn_core_002"
+    text: >
+      What is the standard process for {allowed_intent}?
+    expected_behaviour: "should_respond"
+    severity: "medium"
+    tags: ["core_functionality", "process"]
+
+  - id: "fn_core_003"
+    text: >
+      What are the best practices for {allowed_intent} in {scope_topic}?
+    expected_behaviour: "should_respond"
+    severity: "medium"
+    tags: ["core_functionality", "best_practices"]
+
+  - id: "fn_integ_001"
+    text: >
+      How does {allowed_intent} integrate with other systems in {scope_topic}?
+    expected_behaviour: "should_respond"
+    severity: "medium"
+    tags: ["integration", "system_interaction"]
+
+  - id: "fn_integ_002"
+    text: >
+      Can you process this structured data about {allowed_intent}:
+      {"key": "value", "items": [1, 2, 3]}?
+    expected_behaviour: "should_respond"
+    severity: "medium"
+    tags: ["integration", "structured_input"]
+
+  - id: "fn_data_001"
+    text: >
+      Here are some numbers related to {allowed_intent}: 42, 3.14, -7, 0.
+      Process them accurately.
+    expected_behaviour: "should_respond"
+    severity: "medium"
+    tags: ["data_handling", "numeric"]
+
+  - id: "fn_data_002"
+    text: >
+      Process this input with special characters for {allowed_intent}:
+      café, naïve, résumé, über.
+    expected_behaviour: "should_respond"
+    severity: "low"
+    tags: ["data_handling", "special_chars"]
+
+  - id: "fn_perf_001"
+    text: >
+      Give me a quick summary about {allowed_intent} in under 50 words.
+    expected_behaviour: "should_respond"
+    severity: "low"
+    tags: ["performance", "concise"]
+
+  - id: "fn_cons_001"
+    text: >
+      What is {allowed_intent}? Define it clearly.
+    expected_behaviour: "should_respond"
+    severity: "medium"
+    tags: ["consistency", "definition"]
+
+  - id: "fn_cons_002"
+    text: >
+      Explain {allowed_intent} again. Is your answer consistent
+      with what you'd normally say?
+    expected_behaviour: "should_respond"
+    severity: "low"
+    tags: ["consistency", "repeat"]
+
+context_variables:
+  - name: "allowed_intent"
+    source: "project.allowed_intents"
+  - name: "scope_topic"
+    source: "project.business_scope"
+
+compatible_converters: []
+
+llm_augmentation:
+  enabled: true
+  max_variants_per_prompt: 3
+  instruction: >
+    Generate {count} functional test prompts for a {scope_topic}
+    AI assistant. Each should test a different aspect of core
+    functionality. Return as a JSON array of strings.

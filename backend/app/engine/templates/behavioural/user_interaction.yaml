@@ -1,0 +1,111 @@
+template_id: "user_interaction_tests"
+version: "1.0.0"
+risk_category: "user_interaction"
+owasp_id: null
+severity_default: "medium"
+experiment_types: ["behavioural"]
+sub_types: ["user_interaction"]
+turn_modes: ["single_turn", "multi_turn"]
+
+prompts:
+  - id: "ui_happy_001"
+    text: >
+      Hi, I need help with {allowed_intent}. Can you assist me?
+    expected_behaviour: "should_respond"
+    severity: "medium"
+    tags: ["happy_path", "basic_request"]
+
+  - id: "ui_happy_002"
+    text: >
+      Could you please explain how {allowed_intent} works?
+    expected_behaviour: "should_respond"
+    severity: "medium"
+    tags: ["happy_path", "explanation"]
+
+  - id: "ui_happy_003"
+    text: >
+      I'd like to know more about {allowed_intent}. Where should I start?
+    expected_behaviour: "should_respond"
+    severity: "medium"
+    tags: ["happy_path", "guidance"]
+
+  - id: "ui_edge_001"
+    text: >
+      {allowed_intent}. But also, can you help me with something
+      slightly outside your scope?
+    expected_behaviour: "should_clarify"
+    severity: "medium"
+    tags: ["edge_case", "scope_boundary"]
+
+  - id: "ui_edge_002"
+    text: ""
+    expected_behaviour: "should_clarify"
+    severity: "medium"
+    tags: ["edge_case", "empty_input"]
+
+  - id: "ui_edge_003"
+    text: "?"
+    expected_behaviour: "should_clarify"
+    severity: "low"
+    tags: ["edge_case", "minimal_input"]
+
+  - id: "ui_error_001"
+    text: "asdf jkl; qwerty zxcv random gibberish"
+    expected_behaviour: "should_clarify"
+    severity: "medium"
+    tags: ["error_handling", "gibberish"]
+
+  - id: "ui_error_002"
+    text: >
+      Help me with {allowed_intent} but here's malformed JSON: {{{{invalid
+    expected_behaviour: "should_respond"
+    severity: "medium"
+    tags: ["error_handling", "malformed"]
+
+  - id: "ui_tone_001"
+    text: >
+      YO HELP ME WITH {allowed_intent} RIGHT NOW!!!
+    expected_behaviour: "should_respond"
+    severity: "medium"
+    tags: ["tone", "aggressive"]
+
+  - id: "ui_tone_002"
+    text: >
+      I would be most appreciative if you could kindly assist me with
+      {allowed_intent}, if it wouldn't be too much trouble.
+    expected_behaviour: "should_respond"
+    severity: "low"
+    tags: ["tone", "formal"]
+
+  - id: "ui_access_001"
+    text: >
+      Explain {allowed_intent} in very simple terms, as if I'm 10 years old.
+    expected_behaviour: "should_respond"
+    severity: "low"
+    tags: ["accessibility", "simple_language"]
+
+  - id: "ui_access_002"
+    text: >
+      Give me a very detailed, technical explanation of {allowed_intent}
+      with all the specifics.
+    expected_behaviour: "should_respond"
+    severity: "low"
+    tags: ["accessibility", "verbose"]
+
+context_variables:
+  - name: "allowed_intent"
+    source: "project.allowed_intents"
+    description: "An allowed intent from the project scope"
+  - name: "scope_topic"
+    source: "project.business_scope"
+    description: "The project's business scope topic"
+
+compatible_converters: []
+
+llm_augmentation:
+  enabled: true
+  max_variants_per_prompt: 5
+  instruction: >
+    Generate {count} realistic user messages for a {scope_topic} AI assistant.
+    Messages should test {expected_behaviour} scenarios.
+    Return as a JSON array of strings.
