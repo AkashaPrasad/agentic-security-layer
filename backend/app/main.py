@@ -119,8 +119,8 @@ def create_app() -> FastAPI:
     from app.api.v1.demo_agent import router as demo_agent_router
     from app.api.v1.provider_proxy import router as provider_proxy_router
 
-    app.include_router(monad_router, prefix="/api", tags=["agentshield"])
-    app.include_router(demo_agent_router, prefix="/api", tags=["demo"])
+    app.include_router(monad_router, prefix="/api/v1", tags=["agentshield"])
+    app.include_router(demo_agent_router, prefix="/api/v1", tags=["demo"])
     app.include_router(provider_proxy_router, prefix="/api/v1", tags=["provider-proxy"])
 
     return app

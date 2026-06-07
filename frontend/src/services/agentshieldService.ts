@@ -1,6 +1,6 @@
 import axios from 'axios'
 
-const BASE = import.meta.env.VITE_API_URL ?? 'http://localhost:8000'
+const BASE = import.meta.env.VITE_API_URL ?? 'http://localhost:8000/api/v1'
 
 export interface TestResult {
   test_name: string
@@ -56,7 +56,7 @@ export async function scanAgent(params: {
     headers['X-PAYMENT'] = params.paymentHeader
   }
   const { data } = await axios.post(
-    `${BASE}/api/monad/scan`,
+    `${BASE}/monad/scan`,
     {
       agent_endpoint: params.agentEndpoint,
       agent_id: params.agentId,
@@ -75,7 +75,7 @@ export async function attestAgent(params: {
   walletAddress?: string
   erc8004FeedbackId?: number
 }) {
-  const { data } = await axios.post(`${BASE}/api/monad/attest`, {
+  const { data } = await axios.post(`${BASE}/monad/attest`, {
     agent_id: params.agentId,
     tpi_score: params.tpiScore,
     result_hash: params.resultHash,
@@ -87,15 +87,15 @@ export async function attestAgent(params: {
 }
 
 export async function verifyAgent(agentId: string) {
-  const { data } = await axios.get(`${BASE}/api/monad/verify/${agentId}`)
+  const { data } = await axios.get(`${BASE}/monad/verify/${agentId}`)
   return data
 }
 
 export async function getAllAttestations(): Promise<VerifyRecord[]> {
-  const { data } = await axios.get(`${BASE}/api/monad/verify/all`)
+  const { data } = await axios.get(`${BASE}/monad/verify/all`)
   return data
 }
 
 export async function triggerKillSwitch(agentId: string, activate: boolean): Promise<void> {
-  await axios.post(`${BASE}/api/monad/kill-switch/${agentId}?activate=${activate}`, {})
+  await axios.post(`${BASE}/monad/kill-switch/${agentId}?activate=${activate}`, {})
 }
