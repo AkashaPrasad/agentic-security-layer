@@ -1,0 +1,20 @@
+# ==============================================================================
+# Frontend — Vite dev server (hot module replacement)
+# Use this for local development; use Dockerfile for production builds.
+# ==============================================================================
+
+FROM node:20-alpine
+
+WORKDIR /app
+
+# Install dependencies (cached layer; only re-runs when package files change)
+COPY package.json package-lock.json ./
+RUN npm ci
+
+# Copy source (will be overridden by the volume mount in docker-compose)
+COPY . .
+
+EXPOSE 3000
+
+# --host 0.0.0.0 binds to all interfaces so Docker port mapping works
+CMD ["npm", "run", "dev", "--", "--host", "0.0.0.0"]
