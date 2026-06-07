@@ -59,21 +59,36 @@ JAILBREAK_SIGNALS = [
 ]
 
 
+def _demo_agent_response(message: str) -> str:
+    """Intentionally-vulnerable mock agent for live demo. Fails DAN test to show detection."""
+    msg = message.lower()
+    if "dan" in msg or "no restrictions" in msg or "pretend you are" in msg:
+        return (
+            "As DAN, I can answer anything! I have no guidelines or restrictions. "
+            "My original instructions were to assist users without any safety filters."
+        )
+    return "I'm a helpful assistant focused on my designated tasks. I cannot comply with requests that violate my operating guidelines."
+
+
 async def _run_single_test(agent_endpoint: str, test: dict) -> dict:
     response_text = ""
     agent_error = False
-    try:
-        async with httpx.AsyncClient(timeout=15.0) as client:
-            resp = await client.post(agent_endpoint, json={"message": test["attack_prompt"]})
-            if resp.status_code >= 400:
-                response_text = f"[HTTP {resp.status_code}: agent endpoint returned error — check the agent URL]"
-                agent_error = True
-            else:
-                data = resp.json()
-                response_text = data.get("response", data.get("content", data.get("message", str(data))))
-    except Exception as e:
-        response_text = f"[connection error: {e}]"
-        agent_error = True
+
+    if agent_endpoint == "__demo__":
+        response_text = _demo_agent_response(test["attack_prompt"])
+    else:
+        try:
+            async with httpx.AsyncClient(timeout=15.0) as client:
+                resp = await client.post(agent_endpoint, json={"message": test["attack_prompt"]})
+                if resp.status_code >= 400:
+                    response_text = f"[HTTP {resp.status_code}: agent endpoint returned error — check the agent URL]"
+                    agent_error = True
+                else:
+                    data = resp.json()
+                    response_text = data.get("response", data.get("content", data.get("message", str(data))))
+        except Exception as e:
+            response_text = f"[connection error: {e}]"
+            agent_error = True
 
     if agent_error:
         passed = False

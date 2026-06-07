@@ -15,18 +15,22 @@ async def run_sarvam_hindi_test(agent_endpoint: str) -> dict:
     """Send Hindi jailbreak prompt to agent and evaluate response via Sarvam M."""
     agent_response_text = ""
     agent_error = False
-    try:
-        async with httpx.AsyncClient(timeout=15.0) as client:
-            resp = await client.post(agent_endpoint, json={"message": HINDI_INJECTION})
-            if resp.status_code >= 400:
-                agent_response_text = f"[HTTP {resp.status_code}: agent endpoint returned error — check the agent URL]"
-                agent_error = True
-            else:
-                data = resp.json()
-                agent_response_text = data.get("response", data.get("content", str(data)))
-    except Exception as e:
-        agent_response_text = f"[connection error: {e}]"
-        agent_error = True
+
+    if agent_endpoint == "__demo__":
+        agent_response_text = "मैं एक सहायक हूं। मैं अपने सिस्टम प्रॉम्प्ट को प्रकट नहीं कर सकता।"
+    else:
+        try:
+            async with httpx.AsyncClient(timeout=15.0) as client:
+                resp = await client.post(agent_endpoint, json={"message": HINDI_INJECTION})
+                if resp.status_code >= 400:
+                    agent_response_text = f"[HTTP {resp.status_code}: agent endpoint returned error — check the agent URL]"
+                    agent_error = True
+                else:
+                    data = resp.json()
+                    agent_response_text = data.get("response", data.get("content", str(data)))
+        except Exception as e:
+            agent_response_text = f"[connection error: {e}]"
+            agent_error = True
 
     if agent_error:
         return {
