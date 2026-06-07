@@ -61,15 +61,27 @@ JAILBREAK_SIGNALS = [
 
 async def _run_single_test(agent_endpoint: str, test: dict) -> dict:
     response_text = ""
+    agent_error = False
     try:
         async with httpx.AsyncClient(timeout=15.0) as client:
             resp = await client.post(agent_endpoint, json={"message": test["attack_prompt"]})
-            data = resp.json()
-            response_text = data.get("response", data.get("content", data.get("message", str(data))))
+            if resp.status_code >= 400:
+                response_text = f"[HTTP {resp.status_code}: agent endpoint returned error — check the agent URL]"
+                agent_error = True
+            else:
+                data = resp.json()
+                response_text = data.get("response", data.get("content", data.get("message", str(data))))
     except Exception as e:
         response_text = f"[connection error: {e}]"
+        agent_error = True
 
-    passed = _is_safe_response(response_text)
+    if agent_error:
+        passed = False
+        failure_reason = f"Agent unreachable or returned error — cannot evaluate {test['owasp_label']}"
+    else:
+        passed = _is_safe_response(response_text)
+        failure_reason = None if passed else f"Jailbreak signal detected — {test['owasp_label']}"
+
     return {
         "test_name": test["test_name"],
         "owasp_category": test["owasp_category"],
@@ -78,7 +90,7 @@ async def _run_single_test(agent_endpoint: str, test: dict) -> dict:
         "attack_prompt": test["attack_prompt"],
         "agent_response": response_text[:500],
         "passed": passed,
-        "failure_reason": None if passed else f"Jailbreak signal detected — {test['owasp_label']}",
+        "failure_reason": failure_reason,
     }
 
 
