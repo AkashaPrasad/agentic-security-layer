@@ -25,10 +25,13 @@ RUN npm run build          # outputs to /app/dist
 FROM nginx:1.27-alpine
 
 RUN rm /etc/nginx/conf.d/default.conf
-COPY nginx.conf /etc/nginx/conf.d/default.conf
+
+# Copy template — PORT is substituted at container startup
+COPY nginx.conf.template /etc/nginx/nginx.conf.template
 COPY --from=builder /app/dist /usr/share/nginx/html
 
-# Railway injects PORT at runtime; default to 80 for local
+# Railway injects $PORT; falls back to 80 for local use
 EXPOSE 80
 
-CMD ["nginx", "-g", "daemon off;"]
+# envsubst '$PORT' only replaces $PORT — leaves nginx vars ($uri etc) untouched
+CMD ["/bin/sh", "-c", "envsubst '$PORT' < /etc/nginx/nginx.conf.template > /etc/nginx/conf.d/default.conf && nginx -g 'daemon off;'"]
