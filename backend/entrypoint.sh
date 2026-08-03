@@ -39,9 +39,10 @@ except Exception:
 done
 echo "✅  Redis is ready."
 
-echo "🔄  Running database migrations..."
-alembic upgrade head
-echo "✅  Migrations complete."
+echo "⚠️  Skipping database migrations (disabled temporarily)."
+# echo "🔄  Running database migrations..."
+# alembic upgrade head
+# echo "✅  Migrations complete."
 
 echo "🚀  Starting $1..."
 exec "$@"
