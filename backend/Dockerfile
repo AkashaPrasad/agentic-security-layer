@@ -32,5 +32,5 @@ USER appuser
 EXPOSE 8000
 
 # Railway injects $PORT; falls back to 8000 for local use.
-# Runs Alembic migrations then starts the server.
-CMD ["sh", "-c", "alembic upgrade head && uvicorn app.main:app --host 0.0.0.0 --port ${PORT:-8000}"]
+# Migrations are not run automatically on startup; run them manually if needed.
+CMD ["sh", "-c", "exec uvicorn app.main:app --host 0.0.0.0 --port ${PORT:-8000}"]
