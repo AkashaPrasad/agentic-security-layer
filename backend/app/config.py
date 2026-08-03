@@ -143,7 +143,7 @@ class Settings(BaseSettings):
     def sync_database_url(self) -> str:
         """Sync database URL for Alembic migrations."""
         base = (
-            f"postgresql+psycopg2://{_urlquote(self.postgres_user, safe='')}:{_urlquote(self.postgres_password, safe='')}"
+            f"postgresql+asyncpg://{_urlquote(self.postgres_user, safe='')}:{_urlquote(self.postgres_password, safe='')}"
             f"@{self.postgres_host}:{self.postgres_port}/{self.postgres_db}"
         )
         if self.postgres_requires_ssl:
